@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { HeroCarousel } from "@/components";
 import type { CarouselImage } from "@/components";
+import { getFeaturedPhotos, getGalleryTree, getImageUrl } from "@/lib/pocketbase";
 
-// Placeholder images - replace with your actual images or Pocketbase data
-const heroImages: CarouselImage[] = [
+// Fallback images if no featured photos exist
+const fallbackHeroImages: CarouselImage[] = [
   {
     id: "1",
     src: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=1920&q=80",
@@ -21,7 +22,27 @@ const heroImages: CarouselImage[] = [
   },
 ];
 
-export default function Home() {
+export default async function Home() {
+  // Fetch featured photos for hero carousel
+  const featuredPhotos = await getFeaturedPhotos(6);
+  const heroImages: CarouselImage[] = featuredPhotos.length > 0
+    ? featuredPhotos.map((photo) => ({
+        id: photo.id,
+        src: getImageUrl(photo.collectionId, photo.id, photo.image),
+        alt: photo.title || "Featured photo",
+      }))
+    : fallbackHeroImages;
+
+  // Fetch top-level galleries for Featured Work
+  const galleryTree = await getGalleryTree();
+  const topGalleries = galleryTree.slice(0, 3).map((gallery) => ({
+    title: gallery.name,
+    href: "/galleries/" + gallery.slug,
+    image: gallery.cover_image
+      ? getImageUrl(gallery.collectionId, gallery.id, gallery.cover_image)
+      : "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=600&q=80",
+  }));
+
   return (
     <div>
       {/* Hero Carousel */}
@@ -49,34 +70,32 @@ export default function Home() {
       </section>
 
       {/* Featured Work Preview */}
-      <section className="bg-gray-50 dark:bg-gray-900 py-16 md:py-24">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-2xl md:text-3xl font-semibold mb-8">Featured Work</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[
-              { title: "Travel", href: "/galleries/travel", image: "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=600&q=80" },
-              { title: "Architecture", href: "/galleries/architecture", image: "https://images.unsplash.com/photo-1486325212027-8081e485255e?w=600&q=80" },
-              { title: "Street", href: "/galleries/street", image: "https://images.unsplash.com/photo-1517732306149-e8f829eb588a?w=600&q=80" },
-            ].map((category) => (
-              <Link
-                key={category.title}
-                href={category.href}
-                className="group relative aspect-[4/3] overflow-hidden rounded-lg"
-              >
-                <img
-                  src={category.image}
-                  alt={category.title}
-                  className="w-full h-full object-cover img-hover group-hover:scale-105 transition-transform duration-500"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
-                <h3 className="absolute bottom-4 left-4 text-xl font-semibold text-white">
-                  {category.title}
-                </h3>
-              </Link>
-            ))}
+      {topGalleries.length > 0 && (
+        <section className="bg-gray-50 dark:bg-gray-900 py-16 md:py-24">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 className="text-2xl md:text-3xl font-semibold mb-8">Featured Work</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {topGalleries.map((gallery) => (
+                <Link
+                  key={gallery.title}
+                  href={gallery.href}
+                  className="group relative aspect-[4/3] overflow-hidden rounded-lg"
+                >
+                  <img
+                    src={gallery.image}
+                    alt={gallery.title}
+                    className="w-full h-full object-cover img-hover group-hover:scale-105 transition-transform duration-500"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+                  <h3 className="absolute bottom-4 left-4 text-xl font-semibold text-white">
+                    {gallery.title}
+                  </h3>
+                </Link>
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
     </div>
   );
 }

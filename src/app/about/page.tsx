@@ -22,23 +22,14 @@ export default function AboutPage() {
           <div className="space-y-4 text-[var(--muted)] leading-relaxed">
             <p>
               I&apos;m a London-based photographer with a passion for capturing the energy
-              of the streets, the beauty of architecture, and the wonder of travel.
+              of the streets, the beauty of architecture, and the stories hidden in travel
+              moments. Whether it&apos;s the dynamic movement of a bustling city, the symmetry
+              of a historic landmark, or the quiet charm of an off-the-beaten-path destination,
+              my work is all about finding art in the everyday.
             </p>
             <p>
-              My journey with photography began over a decade ago when I picked up my
-              first camera during a trip through Southeast Asia. Since then, the camera
-              has become an extension of how I see and interact with the world.
-            </p>
-            <p>
-              I believe that every place has a story to tell, and my goal is to capture
-              those fleeting moments that reveal the character and soul of a location.
-              Whether it&apos;s the geometric patterns of modern architecture, the candid
-              interactions on busy streets, or the serene landscapes of remote destinations,
-              I strive to create images that transport viewers to that moment in time.
-            </p>
-            <p>
-              When I&apos;m not behind the camera, you can find me exploring new neighborhoods,
-              planning my next adventure, or sharing stories with fellow photographers.
+              Through my lens, I aim to showcase the unique perspectives, patterns, and
+              emotions that make each place and moment special.
             </p>
           </div>
 
@@ -46,10 +37,9 @@ export default function AboutPage() {
           <div className="mt-8 pt-8 border-t border-[var(--border)]">
             <h2 className="text-xl font-semibold mb-4">Equipment</h2>
             <ul className="space-y-2 text-[var(--muted)]">
-              <li>Sony A7IV</li>
-              <li>Sony 24-70mm f/2.8 GM II</li>
-              <li>Sony 70-200mm f/2.8 GM II</li>
-              <li>Sony 16-35mm f/2.8 GM</li>
+              <li>Nikon D5100 with kit lens 18-55mm f/3.5-5.6</li>
+              <li>Nikkor 35mm f/1.8</li>
+              <li>Nikkor 55-200mm f/4-5.6</li>
             </ul>
           </div>
         </div>

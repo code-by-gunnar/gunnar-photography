@@ -1,5 +1,3 @@
-import Image from "next/image";
-
 export const metadata = {
   title: "About | Gunnar Finkeldeh Photography",
   description: "Learn more about Gunnar Finkeldeh, a London-based photographer specializing in travel, street, and architectural photography.",
@@ -11,12 +9,10 @@ export default function AboutPage() {
       <div className="grid md:grid-cols-2 gap-12 items-start">
         {/* Photo */}
         <div className="relative aspect-[3/4] rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
-          <Image
-            src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&q=80"
+          <img
+            src="/about.jpg"
             alt="Gunnar Finkeldeh"
-            fill
-            className="object-cover"
-            priority
+            className="absolute inset-0 w-full h-full object-cover"
           />
         </div>
 

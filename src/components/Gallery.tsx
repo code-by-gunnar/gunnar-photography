@@ -7,8 +7,8 @@ export interface GalleryImage {
   id: string;
   src: string;
   alt: string;
-  width: number;
-  height: number;
+  width?: number;
+  height?: number;
 }
 
 interface GalleryProps {
@@ -19,25 +19,25 @@ interface GalleryProps {
 export default function Gallery({ images, columns = 3 }: GalleryProps) {
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
-  const gridCols = {
-    2: "md:grid-cols-2",
-    3: "md:grid-cols-2 lg:grid-cols-3",
-    4: "md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4",
+  const columnClasses = {
+    2: "columns-1 md:columns-2",
+    3: "columns-1 md:columns-2 lg:columns-3",
+    4: "columns-1 md:columns-2 lg:columns-3 xl:columns-4",
   };
 
   return (
     <>
-      <div className={"grid grid-cols-1 " + gridCols[columns] + " gap-4"}>
+      <div className={columnClasses[columns] + " gap-4"}>
         {images.map((image, index) => (
           <div
             key={image.id}
-            className="relative aspect-[3/2] overflow-hidden rounded-lg cursor-pointer group"
+            className="mb-4 break-inside-avoid overflow-hidden rounded-lg cursor-pointer group"
             onClick={() => setLightboxIndex(index)}
           >
             <img
               src={image.src}
               alt={image.alt}
-              className="absolute inset-0 w-full h-full object-cover img-hover group-hover:opacity-90"
+              className="w-full h-auto object-cover img-hover group-hover:opacity-90 transition-opacity"
               loading="lazy"
             />
           </div>

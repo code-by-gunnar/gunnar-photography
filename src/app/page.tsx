@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { HeroCarousel } from "@/components";
 import type { CarouselImage } from "@/components";
-import { getFeaturedPhotos, getGalleryTree, getImageUrl } from "@/lib/pocketbase";
+import { getFeaturedPhotos, getGalleryTree, getImageUrl, getGalleryCoverUrl } from "@/lib/pocketbase";
 
 // Fallback images if no featured photos exist
 const fallbackHeroImages: CarouselImage[] = [
@@ -38,9 +38,8 @@ export default async function Home() {
   const topGalleries = galleryTree.slice(0, 3).map((gallery) => ({
     title: gallery.name,
     href: "/galleries/" + gallery.slug,
-    image: gallery.cover_image
-      ? getImageUrl(gallery.collectionId, gallery.id, gallery.cover_image)
-      : "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=600&q=80",
+    image: getGalleryCoverUrl(gallery)
+      || "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=600&q=80",
   }));
 
   return (

@@ -24,7 +24,11 @@ export interface Gallery {
   name: string;
   slug: string;
   description?: string;
-  cover_image?: string;
+  cover_image?: string; // Legacy file field (deprecated)
+  cover_photo?: string; // Relation to photos collection
+  expand?: {
+    cover_photo?: Photo;
+  };
   parent?: string;
   created: string;
   updated: string;
@@ -40,6 +44,20 @@ export function getImageUrl(
 ): string {
   const base = POCKETBASE_URL + "/api/files/" + collectionId + "/" + recordId + "/" + filename;
   return thumb ? base + "?thumb=" + thumb : base;
+}
+
+// Get gallery cover image URL (prefers cover_photo relation, falls back to legacy cover_image)
+export function getGalleryCoverUrl(gallery: Gallery, thumb?: string): string | null {
+  // First try the expanded cover_photo relation
+  if (gallery.expand?.cover_photo) {
+    const photo = gallery.expand.cover_photo;
+    return getImageUrl(photo.collectionId, photo.id, photo.image, thumb);
+  }
+  // Fall back to legacy cover_image file field
+  if (gallery.cover_image) {
+    return getImageUrl(gallery.collectionId, gallery.id, gallery.cover_image, thumb);
+  }
+  return null;
 }
 
 // Build a tree structure from flat galleries
@@ -69,7 +87,7 @@ export function buildGalleryTree(galleries: Gallery[]): Gallery[] {
 export async function getGalleries(): Promise<Gallery[]> {
   try {
     const response = await fetch(
-      POCKETBASE_URL + "/api/collections/galleries/records?sort=name&perPage=100",
+      POCKETBASE_URL + "/api/collections/galleries/records?sort=name&perPage=100&expand=cover_photo",
       { next: { revalidate: 60 } }
     );
 
@@ -96,7 +114,7 @@ export async function getGalleryTree(): Promise<Gallery[]> {
 export async function getGalleryBySlug(slug: string): Promise<Gallery | null> {
   try {
     const response = await fetch(
-      POCKETBASE_URL + "/api/collections/galleries/records?filter=slug='" + encodeURIComponent(slug) + "'",
+      POCKETBASE_URL + "/api/collections/galleries/records?filter=slug='" + encodeURIComponent(slug) + "'&expand=cover_photo",
       { next: { revalidate: 60 } }
     );
 

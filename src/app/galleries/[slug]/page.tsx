@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { getGalleryBySlug, getGalleryPhotos, getGalleries, getImageUrl } from "@/lib/pocketbase";
+import { getGalleryBySlug, getGalleryPhotos, getGalleries, getImageUrl, getGalleryCoverUrl } from "@/lib/pocketbase";
 import { Gallery } from "@/components";
 import type { GalleryImage } from "@/components";
 
@@ -90,9 +90,8 @@ export default async function GalleryPage({ params }: Props) {
           <h2 className="text-xl font-semibold mb-6">Sub-galleries</h2>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {childGalleries.map((child) => {
-              const coverUrl = child.cover_image
-                ? getImageUrl(child.collectionId, child.id, child.cover_image, "300x200")
-                : "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=300&q=80";
+              const coverUrl = getGalleryCoverUrl(child, "300x200")
+                || "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=300&q=80";
 
               return (
                 <Link

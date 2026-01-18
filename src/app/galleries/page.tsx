@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { getGalleryTree, getImageUrl } from "@/lib/pocketbase";
+import { getGalleryTree, getGalleryCoverUrl } from "@/lib/pocketbase";
 import type { Gallery } from "@/lib/pocketbase";
 
 export const metadata = {
@@ -9,9 +9,8 @@ export const metadata = {
 };
 
 function GalleryCard({ gallery }: { gallery: Gallery }) {
-  const coverUrl = gallery.cover_image
-    ? getImageUrl(gallery.collectionId, gallery.id, gallery.cover_image, "400x300")
-    : "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=400&q=80";
+  const coverUrl = getGalleryCoverUrl(gallery, "400x300")
+    || "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=400&q=80";
 
   return (
     <Link

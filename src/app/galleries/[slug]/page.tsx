@@ -12,7 +12,7 @@ interface Props {
 export async function generateMetadata({ params }: Props) {
   const { slug } = await params;
   const gallery = await getGalleryBySlug(slug);
-  
+
   if (!gallery) {
     return { title: "Gallery Not Found" };
   }
@@ -31,12 +31,14 @@ export default async function GalleryPage({ params }: Props) {
     notFound();
   }
 
-  // Get photos for this gallery (including from child galleries)
-  const photos = await getGalleryPhotos(gallery.id, true);
-
-  // Get child galleries if this is a parent
+  // Get child galleries first to determine if this is a parent gallery
   const allGalleries = await getGalleries();
   const childGalleries = allGalleries.filter((g) => g.parent === gallery.id);
+
+  // Get photos for this gallery (including from child galleries)
+  // If this is a parent gallery with children, limit to 2 photos per sub-gallery for a preview
+  const hasChildren = childGalleries.length > 0;
+  const photos = await getGalleryPhotos(gallery.id, true, hasChildren ? 2 : undefined);
 
   // Get parent gallery for breadcrumb
   const parentGallery = gallery.parent

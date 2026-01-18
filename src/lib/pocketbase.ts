@@ -109,21 +109,39 @@ export async function getGalleryBySlug(slug: string): Promise<Gallery | null> {
   }
 }
 
+// Helper to recursively get all descendant gallery IDs
+function getAllDescendantIds(galleryId: string, allGalleries: Gallery[]): string[] {
+  const directChildren = allGalleries.filter((g) => g.parent === galleryId);
+  const descendantIds: string[] = [];
+
+  for (const child of directChildren) {
+    descendantIds.push(child.id);
+    // Recursively get grandchildren, great-grandchildren, etc.
+    descendantIds.push(...getAllDescendantIds(child.id, allGalleries));
+  }
+
+  return descendantIds;
+}
+
 // Fetch photos for a gallery (and optionally its children)
-export async function getGalleryPhotos(galleryId: string, includeChildren = false): Promise<Photo[]> {
+// photosPerGallery: if set, limits photos from each sub-gallery (useful for preview views)
+export async function getGalleryPhotos(
+  galleryId: string,
+  includeChildren = false,
+  photosPerGallery?: number
+): Promise<Photo[]> {
   try {
     let filter = "gallery='" + galleryId + "'";
+    let allGalleryIds = [galleryId];
 
     if (includeChildren) {
-      // Get child gallery IDs first
+      // Get ALL descendant gallery IDs recursively (children, grandchildren, etc.)
       const allGalleries = await getGalleries();
-      const childIds = allGalleries
-        .filter((g) => g.parent === galleryId)
-        .map((g) => g.id);
+      const descendantIds = getAllDescendantIds(galleryId, allGalleries);
 
-      if (childIds.length > 0) {
-        const allIds = [galleryId, ...childIds];
-        filter = allIds.map((id) => "gallery='" + id + "'").join(" || ");
+      if (descendantIds.length > 0) {
+        allGalleryIds = [galleryId, ...descendantIds];
+        filter = allGalleryIds.map((id) => "gallery='" + id + "'").join(" || ");
       }
     }
 
@@ -138,8 +156,36 @@ export async function getGalleryPhotos(galleryId: string, includeChildren = fals
     }
 
     const data = await response.json();
-    console.log("Photos fetched:", data.items?.length || 0);
-    return data.items || [];
+    let photos: Photo[] = data.items || [];
+    console.log("Photos fetched:", photos.length);
+
+    // If photosPerGallery is set, limit photos from each gallery
+    if (photosPerGallery && photosPerGallery > 0 && includeChildren) {
+      const photosByGallery = new Map<string, Photo[]>();
+
+      // Group photos by gallery
+      for (const photo of photos) {
+        const gId = photo.gallery || galleryId;
+        if (!photosByGallery.has(gId)) {
+          photosByGallery.set(gId, []);
+        }
+        photosByGallery.get(gId)!.push(photo);
+      }
+
+      // Shuffle and take photosPerGallery from each gallery
+      photos = [];
+      for (const gId of allGalleryIds) {
+        const galleryPhotos = photosByGallery.get(gId) || [];
+        // Fisher-Yates shuffle for randomization
+        for (let i = galleryPhotos.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [galleryPhotos[i], galleryPhotos[j]] = [galleryPhotos[j], galleryPhotos[i]];
+        }
+        photos.push(...galleryPhotos.slice(0, photosPerGallery));
+      }
+    }
+
+    return photos;
   } catch (error) {
     console.error("Error fetching gallery photos:", error);
     return [];

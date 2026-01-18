@@ -12,6 +12,7 @@ export interface Photo {
   image: string;
   gallery?: string;
   featured?: boolean;
+  hidden?: boolean;
   order?: number;
   created: string;
   updated: string;
@@ -131,7 +132,7 @@ export async function getGalleryPhotos(
   photosPerGallery?: number
 ): Promise<Photo[]> {
   try {
-    let filter = "gallery='" + galleryId + "'";
+    let filter = "gallery='" + galleryId + "' && hidden!=true";
     let allGalleryIds = [galleryId];
 
     if (includeChildren) {
@@ -141,7 +142,7 @@ export async function getGalleryPhotos(
 
       if (descendantIds.length > 0) {
         allGalleryIds = [galleryId, ...descendantIds];
-        filter = allGalleryIds.map((id) => "gallery='" + id + "'").join(" || ");
+        filter = "(" + allGalleryIds.map((id) => "gallery='" + id + "'").join(" || ") + ") && hidden!=true";
       }
     }
 
@@ -196,7 +197,7 @@ export async function getGalleryPhotos(
 export async function getFeaturedPhotos(limit = 10): Promise<Photo[]> {
   try {
     const response = await fetch(
-      POCKETBASE_URL + "/api/collections/photos/records?filter=featured=true&sort=-created&perPage=" + limit,
+      POCKETBASE_URL + "/api/collections/photos/records?filter=" + encodeURIComponent("featured=true && hidden!=true") + "&sort=-created&perPage=" + limit,
       { next: { revalidate: 60 } }
     );
 
@@ -214,7 +215,7 @@ export async function getFeaturedPhotos(limit = 10): Promise<Photo[]> {
 export async function getAllPhotos(limit = 50): Promise<Photo[]> {
   try {
     const response = await fetch(
-      POCKETBASE_URL + "/api/collections/photos/records?sort=-created&perPage=" + limit,
+      POCKETBASE_URL + "/api/collections/photos/records?filter=" + encodeURIComponent("hidden!=true") + "&sort=-created&perPage=" + limit,
       { next: { revalidate: 60 } }
     );
 
